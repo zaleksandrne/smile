@@ -22,7 +22,11 @@ build: `docker build . -t smile`
 
 `docker run -v ~/dev/data:/code/data -e INPUT_FOLDER='data/input_data' -e OUTPUT_FOLDER='data/output_data' -it smile`
 
-Что тут есть: ...
+Что тут есть:
+- `-v ~/dev/data:/code/data` - share директория, в ней должны быть `input_folder` и `output_folder`
+- `-e INPUT_FOLDER='data/input_data'` - input_data директория, содержит `test.csv`. По умолчанию всегда берется первый файл
+- `-e OUTPUT_FOLDER='data/output_data'` - output_data директория, куда сохранятся вероятности
+- `-it smile` - название образа
 
 ## Использование разработанного класса
 
