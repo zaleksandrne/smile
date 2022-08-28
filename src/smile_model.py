@@ -32,6 +32,7 @@ class SmileModel:
         self._sequence_bin_path = sequence_bin_path
 
         self._model: XGBClassifier = XGBClassifier()
+        self._train_columns = None
 
         self._verbose = verbose
 
@@ -48,6 +49,15 @@ class SmileModel:
             model = pickle.load(f)
 
         self._model = model
+
+        # Yeh. These are out best (ha-ha) features, which we did not dropped
+        self._train_columns = [
+            'year', 'month', 'day', 'day_of_week',
+            'tokens_len_source', 'urls_len_source', 'tokens_sum_source', 'urls_sum_source',
+            'urls_lower', 'urls_middle', 'urls_up', 'urls_single',
+            'url_cnt_1', 'url_cnt_2', 'url_cnt_3', 'url_cnt_4', 'url_cnt_5', 'url_cnt_6', 'url_cnt_7', 'url_cnt_8', 'url_cnt_9', 'url_cnt_10',
+            'url_freq_1', 'url_freq_2', 'url_freq_3', 'url_freq_4', 'url_freq_5', 'url_freq_6', 'url_freq_7', 'url_freq_8', 'url_freq_9', 'url_freq_10'
+        ]
 
     def check_input_data(self, X: dd.DataFrame):
         input_columns = X.columns.tolist()
@@ -69,7 +79,8 @@ class SmileModel:
         # from str to tuple of tuples
         # Yeah. I really did not want to do this. But it was too late, and I really
         # wanted to sleep. Sorry...
-        # tokens = vector_processing.to_tuples(X['tokens'])
+        tokens = X['tokens'].compute()
+        tokens = vector_processing.to_tuples(tokens)
         X = X.drop('tokens', axis=1).compute()
 
         X['urls_hashed'] = vector_processing.to_tuples(X['urls_hashed'])
@@ -81,9 +92,9 @@ class SmileModel:
         self._log('Date features were taken')
 
         # # Generate count and freq features
-        # quantitative_features = quantitative_processing.generate_quantitative_features(X, tokens)
-        # self._update_data_dict(X, features=quantitative_features)
-        # self._log('Quantitative features were taken')
+        quantitative_features = quantitative_processing.generate_quantitative_features(X, tokens)
+        self._update_data_dict(X, features=quantitative_features)
+        self._log('Quantitative features were taken')
 
         # Generate range features
         ranges: Dict[str, dd.Series] = urls_processing.generate_ranges(X['urls_hashed'])
@@ -124,7 +135,10 @@ class SmileModel:
         df_prepared = df_prepared.drop(['CLIENT_ID', 'RETRO_DT', 'urls_hashed'], axis=1)
 
         self._log(f'Before fitting. Features: {df_prepared.columns.tolist()}')
+
+        self._train_columns = df_prepared.columns.tolist()
         self._model.fit(df_prepared, y)
+        self._log(f'Complete fit. score: {round(self._score(df_prepared, y), 3)}')
 
         del df_prepared
 
@@ -139,12 +153,29 @@ class SmileModel:
         df_ = X  # it is just I do not like X name
         prepare_methods = self._get_prepare_methods()
 
-        df_prepared = prepare_methods[self._mode](df_)
-        proba = self._model.predict_proba(df_prepared)
+        df_prepared: pd.DataFrame = prepare_methods[self._mode](df_)
+        return self.predict_proba(df_prepared)
 
-        return proba
+    def _predict_proba(self, df_prepared: pd.DataFrame):
+
+        if miss_columns := set(self._train_columns) - set(df_prepared.columns):
+            raise ValueError('It is impossible predict. The columns different from train data columns. '
+                             f'Missed columns: {miss_columns}')
+
+        return self._model.predict_proba(df_prepared[self._train_columns])
 
     def score(self, X, y_true):
         proba = self.predict_proba(X)
+
+        return roc_auc_score(y_true, proba[:, 1])
+
+    def _score(self, df_prepared: pd.DataFrame, y_true):
+        """
+        When you have prepared data
+        :param df_prepared:
+        :param y_true:
+        :return:
+        """
+        proba = self._predict_proba(df_prepared)
 
         return roc_auc_score(y_true, proba[:, 1])
