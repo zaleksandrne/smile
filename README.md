@@ -20,7 +20,7 @@ build: `docker build . -t smile`
 
 Для запуска контейнера есть вот такая вот чудесная команда:
 
-`docker run -v ~/dev/smile/data:/code/data -e INPUT_FOLDER='data/input_data' -e OUTPUT_FOLDER='data/output_data' -it smile`
+`docker run -v ~/dev/data:/code/data -e INPUT_FOLDER='data/input_data' -e OUTPUT_FOLDER='data/output_data' -it smile`
 
 Что тут есть: ...
 
