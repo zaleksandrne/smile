@@ -13,7 +13,11 @@ from .preprocessing import date_processing, vector_processing, urls_processing, 
 
 
 def get_random_message():
-    return 'Oophs'
+    messages = [
+        'Oops, it will be too much, run something simpler mode, for example "time"',
+        'Maybe a little later, for now you can run something simpler mode, for example "time"',
+    ]
+    return np.random.choice(messages)
 
 
 class SmileModel:
