@@ -73,6 +73,7 @@ class SmileModel:
 
     def check_input_data(self, X: dd.DataFrame):
         input_columns = X.columns.tolist()
+        print('input_columns: ', input_columns)
         if extra_columns := ({'CLIENT_ID', 'RETRO_DT', 'tokens', 'urls_hashed'} - set(input_columns)):
             raise Exception('Are you sure, that your X has all required column. '
                             f'It looks like it miss {extra_columns}')
@@ -167,7 +168,7 @@ class SmileModel:
         prepare_methods = self._get_prepare_methods()
 
         df_prepared: pd.DataFrame = prepare_methods[self._mode](df_)
-        return self.predict_proba(df_prepared)
+        return self._predict_proba(df_prepared)
 
     def _predict_proba(self, df_prepared: pd.DataFrame):
 
