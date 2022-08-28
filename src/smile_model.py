@@ -16,6 +16,12 @@ class SmileModel:
     _DEFAULT_MODE_OPTIONS: list = ['time', 'score', 'very_score', 'super_score']
 
     def __init__(self, mode: str, sequence_bin_path: str = None, verbose: bool = False):
+        """
+
+        :param mode: a mode for data preparing. For now it use only "time" mode
+        :param sequence_bin_path: It can be, but it is not using
+        :param verbose: if True, to print logs
+        """
         if mode not in self._DEFAULT_MODE_OPTIONS:
             raise Exception(f'Wrong mode: {mode}. Must be one of: {self._DEFAULT_MODE_OPTIONS}')
 
