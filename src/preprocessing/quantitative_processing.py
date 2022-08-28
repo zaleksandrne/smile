@@ -4,7 +4,6 @@ from dask import dataframe as dd
 
 
 def _l_sum_tokens_count(tokens: Tuple[Tuple[str, int]]):
-    print('_l_sum_tokens_count', tokens)
     return sum(map(lambda v: v[1], tokens))
 
 

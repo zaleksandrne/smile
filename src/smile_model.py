@@ -12,6 +12,10 @@ from sklearn.metrics import roc_auc_score
 from .preprocessing import date_processing, vector_processing, urls_processing, quantitative_processing
 
 
+def get_random_message():
+    return 'Oophs'
+
+
 class SmileModel:
     _DEFAULT_MODE_OPTIONS: list = ['time', 'score', 'very_score', 'super_score']
 
@@ -23,10 +27,14 @@ class SmileModel:
         :param verbose: if True, to print logs
         """
         if mode not in self._DEFAULT_MODE_OPTIONS:
-            raise Exception(f'Wrong mode: {mode}. Must be one of: {self._DEFAULT_MODE_OPTIONS}')
+            raise ValueError(f'Wrong mode: {mode}. Must be one of: {self._DEFAULT_MODE_OPTIONS}')
+        
+        if mode in {'score', 'very_score'}:
+            msg = get_random_message()
+            raise ValueError(msg)
 
         if mode == 'super_score':
-            raise Exception('Sorry, but we have not done it... Maybe next time :)')
+            raise ValueError('Sorry, but we have not done it... Maybe next time :)')
 
         self._mode: str = mode
         self._sequence_bin_path = sequence_bin_path
@@ -96,6 +104,8 @@ class SmileModel:
         self._update_data_dict(X, features=quantitative_features)
         self._log('Quantitative features were taken')
 
+        del tokens  # it is too heavy right now. Dask is beatiful
+
         # Generate range features
         ranges: Dict[str, dd.Series] = urls_processing.generate_ranges(X['urls_hashed'])
         self._update_data_dict(X, features=ranges)
@@ -105,8 +115,7 @@ class SmileModel:
         dfs = urls_processing.create_tfidf_urls(X['urls_hashed'])
         X = pd.concat([X.reset_index(drop=True)] + list(dfs.values()), axis=1)
 
-        self._log('Urls hash frequencies features were taken')
-        self._log('')
+        self._log('Urls hash frequencies features were taken\n')
 
         return X
 
