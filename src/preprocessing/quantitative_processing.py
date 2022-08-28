@@ -14,7 +14,7 @@ def generate_quantitative_features(df_: dd.DataFrame, tokens: dd.Series):
         'urls_len_source': df_['urls_hashed'].apply(lambda v: len(v)),
 
         'tokens_sum_source': tokens.apply(_l_sum_tokens_count),
-        'urls_sum_source': df_['tokens'].apply(_l_sum_tokens_count),
+        'urls_sum_source': df_['urls_hashed'].apply(_l_sum_tokens_count),
     }
 
     return res
