@@ -5,6 +5,9 @@ from dask import dataframe as dd
 
 
 def _l_str_to_tuples(tokens: Union[str, Tuple[Tuple[str, int]]]):
+    if pd.isna(tokens):
+        return tuple()
+
     if isinstance(tokens, str):
         if not tokens or ' ' not in tokens:
             out = tuple()  # outliers

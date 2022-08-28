@@ -1,7 +1,9 @@
 import argparse
+from dask import dataframe as dd
 import zipfile
 import os
 
+from src import SmileModel
 
 parser = argparse.ArgumentParser(description='Smile baseline')
 parser.add_argument('--output_folder', default='output_data', type=str)
@@ -26,8 +28,23 @@ def result(input_folder, output_folder):
     with open(f'/code/{output_folder}/result.txt', 'w') as f:
         f.write(result)
 
-
     print(f'{input_folder}/{input_file}')
+
+
+def apply_model(df: dd.DataFrame):
+    y = None  # by default y may be not to be
+
+    if 'DEF' in df.columns.tolist():
+        df, y = df.drop('DEF', axis=1), df['DEF']
+
+    smile = SmileModel(mode='time', verbose=True)
+    proba = smile.predict_proba(df)
+
+    return proba
+
+
+
+
 
 
 if __name__ == '__main__':

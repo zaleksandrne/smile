@@ -1,3 +1,5 @@
+import pickle
+from pathlib import Path
 from typing import Union, Dict, Callable
 
 import numpy as np
@@ -30,6 +32,16 @@ class SmileModel:
     def _log(self, log: str):
         if self._verbose:
             print(log)
+
+    def with_model(self, model_path: str):
+        path = Path(model_path)
+        if not path.exists():
+            raise Exception(f'The model by path "{model_path}" is not exists')
+
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
+
+        self._model = model
 
     def check_input_data(self, X: dd.DataFrame):
         input_columns = X.columns.tolist()
@@ -99,8 +111,7 @@ class SmileModel:
                          self.prepare_input_data_very_score, self.prepare_input_data_super_score]))
 
     def fit(self, X: dd.DataFrame, y: Union[dd.Series, np.ndarray]):
-        # it is just I do not like X name. And come on, it is huge data...
-        df_ = X.dropna().reset_index(drop=True)
+        df_ = X.reset_index(drop=True)
         prepare_methods = self._get_prepare_methods()
 
         df_prepared = prepare_methods[self._mode](df_)
@@ -108,6 +119,8 @@ class SmileModel:
 
         self._log(f'Before fitting. Features: {df_prepared.columns.tolist()}')
         self._model.fit(df_prepared, y)
+
+        del df_prepared
 
         return self
 
