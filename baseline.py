@@ -28,14 +28,14 @@ def result(input_folder, output_folder):
             input_file = list(filter(lambda f: not f.startswith('.'), os.listdir(input_folder)))[0]
 
     df_test = dd.read_csv(f'{input_folder}/{input_file}', sep='\t')
+
     proba = apply_model(df_test)
 
     proba_df = pd.DataFrame(proba, columns=['proba_1', 'proba_2'])
-    proba_df['CLIENT_ID'] = df_test['CLIENT_ID'].values
+    proba_df['CLIENT_ID'] = df_test['CLIENT_ID'].compute().values
     proba_df = proba_df[['CLIENT_ID', 'proba_1', 'proba_2']]
 
-    proba_df.to_csv(f'/code/{output_folder}/test_eval.csv', sep='\t', index=False)
-
+    proba_df.to_csv(f'/code/{output_folder}/test_eval.csv', sep=',', index=False)
 
 
 def apply_model(df: dd.DataFrame):
