@@ -99,8 +99,7 @@ class SmileModel:
                          self.prepare_input_data_very_score, self.prepare_input_data_super_score]))
 
     def fit(self, X: dd.DataFrame, y: Union[dd.Series, np.ndarray]):
-        # it is just I do not like X name. And come on, it is huge data...
-        df_ = X.dropna().reset_index(drop=True)
+        df_ = X.reset_index(drop=True)
         prepare_methods = self._get_prepare_methods()
 
         df_prepared = prepare_methods[self._mode](df_)
@@ -108,6 +107,8 @@ class SmileModel:
 
         self._log(f'Before fitting. Features: {df_prepared.columns.tolist()}')
         self._model.fit(df_prepared, y)
+
+        del df_prepared
 
         return self
 
