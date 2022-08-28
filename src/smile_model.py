@@ -168,7 +168,7 @@ class SmileModel:
         prepare_methods = self._get_prepare_methods()
 
         df_prepared: pd.DataFrame = prepare_methods[self._mode](df_)
-        return self.predict_proba(df_prepared)
+        return self._predict_proba(df_prepared)
 
     def _predict_proba(self, df_prepared: pd.DataFrame):
 
