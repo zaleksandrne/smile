@@ -6,5 +6,6 @@ COPY . /code
 RUN apt update
 RUN apt install -y gettext
 WORKDIR /code
-ENV FOLDER='output_folder'
-CMD python baseline.py --folder ${FOLDER}
+ENV OUTPUT_FOLDER='output_folder'
+ENV INPUT_FOLDER='intput_folder'
+CMD python baseline.py --input_folder ${INPUT_FOLDER} --output_folder ${OUTPUT_FOLDER}
