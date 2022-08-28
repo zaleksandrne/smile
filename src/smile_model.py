@@ -1,3 +1,5 @@
+import pickle
+from pathlib import Path
 from typing import Union, Dict, Callable
 
 import numpy as np
@@ -30,6 +32,16 @@ class SmileModel:
     def _log(self, log: str):
         if self._verbose:
             print(log)
+
+    def with_model(self, model_path: str):
+        path = Path(model_path)
+        if not path.exists():
+            raise Exception(f'The model by path "{model_path}" is not exists')
+
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
+
+        self._model = model
 
     def check_input_data(self, X: dd.DataFrame):
         input_columns = X.columns.tolist()

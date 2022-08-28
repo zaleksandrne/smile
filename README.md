@@ -1,4 +1,6 @@
-# smile
+# SMILE
+
+
 
 ## build
 docker build . -t smile 
