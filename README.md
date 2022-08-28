@@ -33,4 +33,41 @@ build: `docker build . -t smile`
     - `time` - генерирует признаки заложенные изначально, после анализа данных для обучения
     - `score` - добавляет векторизацию токенов
     - `very_score` - добавляет векторизацию хэшей (безконтекстная модель)
-    - `super_score`
+    - `super_score` - добавляет использование контекстной модели для векторизации хэшей
+- verbose - печаталь ли в консоль сообщения в процессе предобработки данных
+
+Важно отметить, что моды: `[score, very_score, super_score]` в данный момент не работают. Так как они не дали никакого прироста к результату, 
+мы решили не тратить на них время и не разрабатывать.
+
+### Методы
+
+- `fit(X, y)` - X это сырые данные типа dask.datasets.DataFrame. y принимает np.ndarray или pd.Series
+- `with_model(model_path: str)` - model_path - путь к моделе в pickle. Лежит в репозитории `src/models/xgb_model.pkl`. 
+- `predict_proba(X)` - X это сырые данные типа dask.datasets.DataFrame
+- `score(X, y_true)` - X это сырые данные типа dask.datasets.DataFrame. y это np.ndarray или pd.Series
+
+### Пример запуска предсказания вероятностей
+
+```python
+from dask import dataframe as dd
+from src import SmileModel
+
+train_path = '../data/train'  # it is .csv file, with sep='\t'
+
+# to create an instace
+smile = SmileModel(mode='time', verbose=True)
+
+# to set a model (already fitted)
+smile.with_model('src/models/xgb_model.pkl')
+
+df = dd.read_csv(train_path, sep='\t')  # read data using dask
+y = None
+
+if 'DEF' in df.columns:
+    X, y = df.drop('DEF', axis=1), df['DEF'].compute().values
+
+if y is None:
+    proba = smile.predict_proba(X)
+else:
+    smile.score(X, y)  # it will return roc_auc metric
+```

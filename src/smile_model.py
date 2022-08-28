@@ -73,6 +73,7 @@ class SmileModel:
 
     def check_input_data(self, X: dd.DataFrame):
         input_columns = X.columns.tolist()
+        print('input_columns: ', input_columns)
         if extra_columns := ({'CLIENT_ID', 'RETRO_DT', 'tokens', 'urls_hashed'} - set(input_columns)):
             raise Exception('Are you sure, that your X has all required column. '
                             f'It looks like it miss {extra_columns}')
